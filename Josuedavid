@@ -1,0 +1,103 @@
+-- Esperar a que todo esté listo
+repeat task.wait() until game.Players.LocalPlayer and game.Players.LocalPlayer:FindFirstChild("PlayerGui")
+
+local player = game.Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+-- Crear el GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "JOSU_HUB"
+ScreenGui.Parent = PlayerGui
+ScreenGui.ResetOnSpawn = false
+
+-- Frame principal
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 220, 0, 160)
+Frame.Position = UDim2.new(0.5, -110, 0.5, -80)
+Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+Frame.BackgroundTransparency = 0.2
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
+
+-- Título
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 30)
+Title.BackgroundColor3 = Color3.fromRGB(0, 120, 255)
+Title.Text = "JOSU HUB"
+Title.TextScaled = true
+Title.TextColor3 = Color3.new(1, 1, 1)
+Title.Parent = Frame
+
+-- Función para crear botones
+local function CreateButton(text, posY)
+	local Button = Instance.new("TextButton")
+	Button.Size = UDim2.new(1, -20, 0, 35)
+	Button.Position = UDim2.new(0, 10, 0, posY)
+	Button.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+	Button.TextColor3 = Color3.new(1, 1, 1)
+	Button.TextScaled = true
+	Button.Text = text
+	Button.Parent = Frame
+	return Button
+end
+
+-- Crear botones
+local BtnTP = CreateButton("TP (Guardar Pos)", 40)
+local BtnTP2 = CreateButton("TP2 (Ir a Pos)", 80)
+local BtnTP3 = CreateButton("TP3 (Traspasar)", 120)
+
+-- Variables de posición
+local savedPosition = nil
+
+-- TP (Guardar posición)
+BtnTP.MouseButton1Click:Connect(function()
+	local character = player.Character or player.CharacterAdded:Wait()
+	local root = character:WaitForChild("HumanoidRootPart")
+	savedPosition = root.Position
+	game.StarterGui:SetCore("SendNotification", {
+		Title = "JOSU HUB",
+		Text = "📍 Posición guardada!",
+		Duration = 2
+	})
+end)
+
+-- TP2 (Teletransportar)
+BtnTP2.MouseButton1Click:Connect(function()
+	if not savedPosition then
+		game.StarterGui:SetCore("SendNotification", {
+			Title = "JOSU HUB",
+			Text = "⚠️ No hay posición guardada!",
+			Duration = 2
+		})
+		return
+	end
+	local character = player.Character or player.CharacterAdded:Wait()
+	local root = character:WaitForChild("HumanoidRootPart")
+	root.CFrame = CFrame.new(savedPosition + Vector3.new(0, 3, 0))
+	game.StarterGui:SetCore("SendNotification", {
+		Title = "JOSU HUB",
+		Text = "✅ Teletransportado!",
+		Duration = 2
+	})
+end)
+
+-- TP3 (Traspasar paredes)
+BtnTP3.MouseButton1Click:Connect(function()
+	local character = player.Character or player.CharacterAdded:Wait()
+	for _, part in ipairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanCollide = false
+		end
+	end
+	game.StarterGui:SetCore("SendNotification", {
+		Title = "JOSU HUB",
+		Text = "🚪 Traspasar activado (5s)",
+		Duration = 2
+	})
+	task.wait(5)
+	for _, part in ipairs(character:GetDescendants()) do
+		if part:IsA("BasePart") then
+			part.CanCollide = true
+		end
+	end
+end)
